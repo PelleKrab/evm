@@ -7,11 +7,23 @@ use revm::context_interface::result::{EVMError, InvalidTransaction};
 pub trait InvalidTxError: Error + Send + Sync + 'static {
     /// Returns whether the error cause by transaction having a nonce lower than expected.
     fn is_nonce_too_low(&self) -> bool;
+    /// Returns whether the error was caused by transaction having a nonce higher than expected.
+    fn is_nonce_too_high(&self) -> bool;
+    /// Returns whether the error was caused by the acount lacking funds to pay the max fee.
+    fn is_lack_of_funds_for_max_fee(&self) -> bool;
 }
 
 impl InvalidTxError for InvalidTransaction {
     fn is_nonce_too_low(&self) -> bool {
         matches!(self, Self::NonceTooLow { .. })
+    }
+
+    fn is_nonce_too_high(&self) -> bool {
+        matches!(self, Self::NonceTooHigh { .. })
+    }
+
+    fn is_lack_of_funds_for_max_fee(&self) -> bool {
+        matches!(self, Self::LackOfFundForMaxFee { .. })
     }
 }
 
@@ -66,5 +78,13 @@ where
 impl InvalidTxError for op_revm::OpTransactionError {
     fn is_nonce_too_low(&self) -> bool {
         matches!(self, Self::Base(tx) if tx.is_nonce_too_low())
+    }
+
+    fn is_nonce_too_high(&self) -> bool {
+        matches!(self, Self::Base(tx) if tx.is_nonce_too_high())
+    }
+
+    fn is_lack_of_funds_for_max_fee(&self) -> bool {
+        matches!(self, Self::Base(tx) if tx.is_lack_of_funds_for_max_fee())
     }
 }
