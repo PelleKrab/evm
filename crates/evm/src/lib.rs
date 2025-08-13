@@ -20,6 +20,12 @@ pub mod error;
 pub use error::*;
 pub mod tx;
 pub use tx::*;
+pub mod traits;
+pub use traits::*;
+#[cfg(feature = "call-util")]
+pub mod call;
+#[cfg(feature = "overrides")]
+pub mod overrides;
 pub mod precompiles;
 pub mod tracing;
 
