@@ -11,7 +11,6 @@ pub trait InvalidTxError: Error + Send + Sync + Any + 'static {
     fn is_nonce_too_high(&self) -> bool;
     /// Returns whether the error was caused by the acount lacking funds to pay the max fee.
     fn is_lack_of_funds_for_max_fee(&self) -> bool;
-
     /// Returns the underlying [`InvalidTransaction`] if any.
     ///
     /// This is primarily used for error conversions, e.g. for rpc responses.
@@ -29,6 +28,7 @@ impl InvalidTxError for InvalidTransaction {
 
     fn is_lack_of_funds_for_max_fee(&self) -> bool {
         matches!(self, Self::LackOfFundForMaxFee { .. })
+    }
         
     fn as_invalid_tx_err(&self) -> Option<&InvalidTransaction> {
         Some(self)
@@ -94,6 +94,7 @@ impl InvalidTxError for op_revm::OpTransactionError {
 
     fn is_lack_of_funds_for_max_fee(&self) -> bool {
         matches!(self, Self::Base(tx) if tx.is_lack_of_funds_for_max_fee())
+    }
         
     fn as_invalid_tx_err(&self) -> Option<&InvalidTransaction> {
         match self {
