@@ -108,9 +108,6 @@ pub enum BlockExecutionError {
     /// Internal, i.e. non consensus or validation related Block Executor Errors
     #[error(transparent)]
     Internal(#[from] InternalBlockExecutionError),
-    /// Error when block did not satisfy the inclusion list (EIP-7805)
-    #[error("block did not satisfy inclusion list")]
-    InvalidInclusionList,
 }
 
 impl BlockExecutionError {
