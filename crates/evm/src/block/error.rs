@@ -79,6 +79,9 @@ pub enum BlockValidationError {
     /// [EIP-6110]: https://eips.ethereum.org/EIPS/eip-6110
     #[error("failed to decode deposit requests from receipts: {_0}")]
     DepositRequestDecode(String),
+    /// Error when block did not satisfy the inclusion list (EIP-7805)
+    #[error("block did not satisfy inclusion list")]
+    InvalidInclusionList,
     /// Arbitrary Block validation errors.
     #[error(transparent)]
     Other(Box<dyn core::error::Error + Send + Sync + 'static>),
