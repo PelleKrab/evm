@@ -37,11 +37,24 @@ pub trait InvalidTxError: Error + Send + Sync + Any + 'static {
     ///
     /// This is primarily used for error conversions, e.g. for rpc responses.
     fn as_invalid_tx_err(&self) -> Option<&InvalidTransaction>;
+
+    /// Returns whether the error was caused by transaction having a nonce higher than expected.
+    fn is_nonce_too_high(&self) -> bool;
+    /// Returns whether the error was caused by the account lacking funds to pay the max fee.
+    fn is_lack_of_funds_for_max_fee(&self) -> bool;
 }
 
 impl InvalidTxError for InvalidTransaction {
     fn as_invalid_tx_err(&self) -> Option<&InvalidTransaction> {
         Some(self)
+    }
+
+    fn is_nonce_too_high(&self) -> bool {
+        matches!(self, Self::NonceTooHigh { .. })
+    }
+
+    fn is_lack_of_funds_for_max_fee(&self) -> bool {
+        matches!(self, Self::LackOfFundForMaxFee { .. })
     }
 }
 
@@ -89,5 +102,23 @@ where
             Self::Transaction(err) => Ok(err),
             err => Err(err),
         }
+    }
+}
+
+#[cfg(feature = "op")]
+impl InvalidTxError for op_revm::OpTransactionError {
+    fn as_invalid_tx_err(&self) -> Option<&InvalidTransaction> {
+        match self {
+            Self::Base(tx) => Some(tx),
+            _ => None,
+        }
+    }
+
+    fn is_nonce_too_high(&self) -> bool {
+        matches!(self, Self::Base(InvalidTransaction::NonceTooHigh { .. }))
+    }
+
+    fn is_lack_of_funds_for_max_fee(&self) -> bool {
+        matches!(self, Self::Base(InvalidTransaction::LackOfFundForMaxFee { .. }))
     }
 }
